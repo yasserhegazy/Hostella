@@ -6,12 +6,13 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+      baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
       timeout: 15000,
+      withCredentials: true,
+      withXSRFToken: true,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        'Accept': 'application/json'
       }
     })
 
@@ -19,16 +20,8 @@ class ApiClient {
   }
 
   private setupInterceptors() {
-    // Request interceptor
     this.client.interceptors.request.use(
       (config) => {
-        // Add auth token if available
-        const token = localStorage.getItem('token')
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-
-        // Add tenant identifier if available
         const tenantId = localStorage.getItem('tenant_id')
         if (tenantId) {
           config.headers['X-Tenant'] = tenantId
@@ -39,23 +32,21 @@ class ApiClient {
       (error) => Promise.reject(error)
     )
 
-    // Response interceptor
     this.client.interceptors.response.use(
-      (response) => response.data, // Return data directly
+      (response) => response.data,
       async (error: AxiosError<ApiError>) => {
-        // Handle 401: Unauthorized
         if (error.response?.status === 401) {
-          localStorage.removeItem('token')
-          localStorage.removeItem('tenant_id')
-          window.location.href = '/login'
+          return Promise.reject({
+            ...(error.response?.data ?? {}),
+            status: 401,
+            unauthorized: true
+          })
         }
 
-        // Handle 403: Forbidden
         if (error.response?.status === 403) {
           console.error('Forbidden: You do not have permission for this action')
         }
 
-        // Handle 422: Validation errors
         if (error.response?.status === 422 && error.response.data.errors) {
           return Promise.reject({
             validationErrors: error.response.data.errors,
@@ -63,7 +54,6 @@ class ApiClient {
           })
         }
 
-        // Handle 500: Server errors
         if (error.response?.status && error.response.status >= 500) {
           console.error('Server error:', error.response.data)
         }
@@ -71,6 +61,12 @@ class ApiClient {
         return Promise.reject(error.response?.data || error)
       }
     )
+  }
+
+  async getCsrfCookie(): Promise<void> {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+    const origin = /^https?:\/\//.test(baseUrl) ? new URL(baseUrl).origin : ''
+    await axios.get(`${origin}/sanctum/csrf-cookie`, { withCredentials: true })
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
