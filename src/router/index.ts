@@ -40,6 +40,11 @@ const router = createRouter({
       meta: { guest: true }
     },
     {
+      path: '/hotel/profile',
+      name: 'hotel-profile',
+      component: () => import('@/modules/tenants/views/HotelProfileView.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
