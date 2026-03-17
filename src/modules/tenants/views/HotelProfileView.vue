@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import BaseButton from '@/components/base/BaseButton.vue'
+import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
 import HotelProfileHeader from '../components/profile/HotelProfileHeader.vue'
 import HotelInfoSection from '../components/profile/HotelInfoSection.vue'
 import HotelLocationSection from '../components/profile/HotelLocationSection.vue'
@@ -50,6 +51,7 @@ function handleBannerChange() {
             <router-link to="/" class="text-sm text-gray-500 hover:text-primary transition-colors">
               ← Back to Home
             </router-link>
+            <LogoutButton />
           </div>
         </div>
       </div>
