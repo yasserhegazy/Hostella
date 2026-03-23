@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import BaseCard from '@/components/base/BaseCard.vue'
 import LoginForm from '../components/LoginForm.vue'
 import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { loading, error, validationErrors, login } = useAuth()
 
 async function handleSubmit(credentials: { email: string; password: string }) {
   try {
     await login(credentials)
-    router.push({ name: 'hotel-profile' })
+    const redirect = route.query.redirect as string | undefined
+    router.push(redirect || { name: 'hotel-profile' })
   } catch {
     // handled by composable
   }
