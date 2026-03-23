@@ -1,3 +1,5 @@
+import type { UserRole } from '@/types/roles'
+
 export interface AuthUser {
   id: number
   first_name: string
@@ -5,7 +7,12 @@ export interface AuthUser {
   email: string
   phone: string | null
   preferred_language: string
+  is_active: boolean
+  activated_at: string | null
+  last_login_at: string | null
+  roles: UserRole[]
   created_at: string
+  updated_at: string
 }
 
 export interface LoginRequest {
@@ -37,3 +44,5 @@ export interface ResetPasswordResponse {
   message: string
   status: string
 }
+
+export type StaffUser = AuthUser
