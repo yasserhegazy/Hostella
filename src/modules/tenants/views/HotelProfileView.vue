@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
-import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
 import HotelProfileHeader from '../components/profile/HotelProfileHeader.vue'
 import HotelInfoSection from '../components/profile/HotelInfoSection.vue'
 import HotelLocationSection from '../components/profile/HotelLocationSection.vue'
@@ -32,33 +32,9 @@ function handleBannerChange() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-slate-50">
-    <!-- Top Nav -->
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <router-link to="/" class="flex items-center gap-2.5 group">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-200">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-            <span class="text-xl font-bold text-gray-900">Host<span class="text-primary">ella</span></span>
-          </router-link>
-
-          <div class="flex items-center gap-3">
-            <router-link to="/" class="text-sm text-gray-500 hover:text-primary transition-colors">
-              ← Back to Home
-            </router-link>
-            <LogoutButton />
-          </div>
-        </div>
-      </div>
-    </nav>
-
+  <AppLayout>
     <!-- Loading State -->
-    <div v-if="loading" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+    <div v-if="loading" class="max-w-4xl mx-auto py-20 text-center">
       <svg class="animate-spin mx-auto h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path class="opacity-75" fill="currentColor"
@@ -68,7 +44,7 @@ function handleBannerChange() {
     </div>
 
     <!-- Main Content -->
-    <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div v-else class="max-w-4xl mx-auto space-y-6">
       <!-- Hero Banner -->
       <HotelProfileHeader
         :hotel-name="profile.name"
@@ -143,13 +119,6 @@ function handleBannerChange() {
           Save Changes
         </BaseButton>
       </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-gray-100 bg-white/50">
-      <p class="text-center text-xs text-gray-400 py-4">
-        © {{ new Date().getFullYear() }} Hostella. All rights reserved.
-      </p>
-    </footer>
-  </div>
+    </div>
+  </AppLayout>
 </template>
