@@ -1,10 +1,11 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useNotifications } from '@/composables/useNotifications'
 import type {
   AuthUser,
   LoginRequest,
-  LoginResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   ResetPasswordRequest,
@@ -12,17 +13,14 @@ import type {
 } from '../types'
 import { apiClient } from '@/services/api/client'
 
-const user = ref<AuthUser | null>(null)
-const loading = ref(false)
 const error = ref<string | null>(null)
 const validationErrors = ref<Record<string, string[]>>({})
-const initialized = ref(false)
 
 export function useAuth() {
+  const authStore = useAuthStore()
+  const { user, loading, isAuthenticated } = storeToRefs(authStore)
   const api = useApi()
   const notifications = useNotifications()
-
-  const isAuthenticated = computed(() => user.value !== null)
 
   function clearErrors() {
     error.value = null
@@ -42,49 +40,34 @@ export function useAuth() {
   }
 
   async function login(credentials: LoginRequest) {
-    loading.value = true
     clearErrors()
 
     try {
-      await apiClient.getCsrfCookie()
-      const data = await api.post<LoginResponse>('/auth/login', credentials)
-      user.value = data.user
+      const data = await authStore.login(credentials)
       notifications.success('Logged in successfully')
       return data
     } catch (err: unknown) {
       handleError(err, 'Invalid credentials')
       throw err
-    } finally {
-      loading.value = false
     }
   }
 
   async function logout() {
-    loading.value = true
-    try {
-      await api.post('/auth/logout')
-    } catch {
-      // Proceed with local cleanup even if request fails
-    } finally {
-      user.value = null
-      localStorage.removeItem('tenant_id')
-      loading.value = false
-    }
+    await authStore.logout()
   }
 
   async function fetchUser() {
     try {
       const data = await api.get<AuthUser>('/auth/me')
-      user.value = data
+      authStore.setUser(data)
       return data
     } catch {
-      user.value = null
+      authStore.setUser(null)
       return null
     }
   }
 
   async function forgotPassword(data: ForgotPasswordRequest) {
-    loading.value = true
     clearErrors()
 
     try {
@@ -95,13 +78,10 @@ export function useAuth() {
     } catch (err: unknown) {
       handleError(err, 'Failed to send reset link')
       throw err
-    } finally {
-      loading.value = false
     }
   }
 
   async function resetPassword(data: ResetPasswordRequest) {
-    loading.value = true
     clearErrors()
 
     try {
@@ -112,15 +92,11 @@ export function useAuth() {
     } catch (err: unknown) {
       handleError(err, 'Failed to reset password')
       throw err
-    } finally {
-      loading.value = false
     }
   }
 
   async function initAuth() {
-    if (initialized.value) return
-    initialized.value = true
-    await fetchUser()
+    await authStore.init()
   }
 
   return {
