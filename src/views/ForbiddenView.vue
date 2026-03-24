@@ -12,9 +12,9 @@ function goBack() {
 
 function goToDashboard() {
   if (auth.isOwner) {
-    router.push({ name: 'hotel-profile' })
+    router.push({ name: 'dashboard' })
   } else {
-    router.push({ name: 'hotel-profile' })
+    router.push({ name: 'staff-dashboard' })
   }
 }
 </script>

@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { useApi } from '@/composables/useApi'
+import { apiClient } from '@/services/api/client'
 import { useNotifications } from '@/composables/useNotifications'
 import type {
   InitRegistrationRequest,
@@ -38,6 +39,7 @@ export function useTenantRegistration() {
     validationErrors.value = {}
 
     try {
+      await apiClient.getCsrfCookie()
       const response = await api.post<InitRegistrationResponse>(
         '/v1/hotels/init-register',
         data
@@ -96,6 +98,7 @@ export function useTenantRegistration() {
     validationErrors.value = {}
 
     try {
+      await apiClient.getCsrfCookie()
       const response = await api.post<SetPasswordResponse>(
         '/v1/hotels/set-password',
         data

@@ -1,5 +1,16 @@
 import type { UserRole } from '@/types/roles'
 
+export interface StaffLoginRequest {
+  email: string
+  password: string
+}
+
+export interface StaffLoginResponse {
+  message: string
+  user: StaffUser
+  tenant_id: string | null
+}
+
 /**
  * Staff User - Same as AuthUser (from backend TenantUser)
  */
@@ -14,6 +25,7 @@ export interface StaffUser {
   activated_at: string | null
   last_login_at: string | null
   roles: UserRole[]
+  user_type: 'owner' | 'staff'
   created_at: string
   updated_at: string
 }
