@@ -49,6 +49,13 @@ async function handleSubmit(credentials: { email: string; password: string }) {
           :validation-errors="validationErrors"
           @submit="handleSubmit"
         />
+
+        <p class="text-center text-sm text-gray-500 mt-5 pt-5 border-t border-gray-100">
+          Hotel staff member?
+          <router-link to="/staff/login" class="text-emerald-600 hover:text-emerald-700 font-medium">
+            Staff login
+          </router-link>
+        </p>
       </div>
     </BaseCard>
   </AuthLayout>
