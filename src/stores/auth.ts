@@ -18,10 +18,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const roles = computed(() => user.value?.roles ?? [])
 
-  // Owners are User model users (no Spatie roles). Staff are TenantUser (with roles).
   const isOwner = computed(() => {
     if (!user.value) return false
-    return roles.value.length === 0 || roles.value.includes(UserRole.HOTEL_ADMIN)
+    return user.value.user_type === 'owner'
   })
 
   // Actions
@@ -43,11 +42,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUser() {
     try {
-      const data = await api.get<AuthUser>('/auth/me')
+      // Staff sessions store tenant_id in localStorage — use the staff me endpoint
+      const isStaff = !!localStorage.getItem('tenant_id')
+      const endpoint = isStaff ? '/v1/staff/auth/me' : '/auth/me'
+      const data = await api.get<AuthUser>(endpoint)
       user.value = data
+
       return data
     } catch {
       user.value = null
+      // If staff auth failed, clear stale tenant indicator
+      localStorage.removeItem('tenant_id')
       return null
     }
   }
@@ -72,6 +77,7 @@ export const useAuthStore = defineStore('auth', () => {
       await apiClient.getCsrfCookie()
       const data = await apiClient.post<LoginResponse>('/auth/login', credentials)
       user.value = data.user
+
       return data
     } catch (err) {
       throw err
@@ -84,7 +90,10 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      await api.post('/auth/logout')
+      // Staff sessions use the staff logout endpoint
+      const isStaff = !!localStorage.getItem('tenant_id')
+      const endpoint = isStaff ? '/v1/staff/auth/logout' : '/auth/logout'
+      await api.post(endpoint)
     } catch {
       // Proceed with local cleanup even if request fails
     } finally {

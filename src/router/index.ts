@@ -9,6 +9,7 @@ declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
     guest?: boolean
+    ownerOnly?: boolean
     roles?: UserRoleType[]
   }
 }
@@ -55,7 +56,7 @@ const router = createRouter({
       path: '/hotel/profile',
       name: 'hotel-profile',
       component: () => import('@/modules/tenants/views/HotelProfileView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, ownerOnly: true }
     },
     {
       path: '/login',
@@ -122,6 +123,13 @@ const router = createRouter({
         guest: true
       }
     },
+    // Staff Login (separate login page for hotel staff members)
+    {
+      path: '/staff/login',
+      name: 'staff-login',
+      component: () => import('@/modules/staff/views/StaffLoginView.vue'),
+      meta: { guest: true }
+    },
     // Owner Dashboard
     {
       path: '/dashboard',
@@ -170,6 +178,11 @@ router.beforeEach(async (to, _from, next) => {
     if (!auth.hasAnyRole(to.meta.roles as UserRoleType[])) {
       return next({ name: 'forbidden' })
     }
+  }
+
+  // Owner-only routes — block staff entirely
+  if (to.meta.ownerOnly && !auth.isOwner) {
+    return next({ name: 'forbidden' })
   }
 
   // Redirect authenticated users away from guest routes

@@ -11,6 +11,7 @@ export interface AuthUser {
   activated_at: string | null
   last_login_at: string | null
   roles: UserRole[]
+  user_type: 'owner' | 'staff'
   created_at: string
   updated_at: string
 }
